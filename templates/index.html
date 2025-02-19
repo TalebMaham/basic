@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion du Stock et du Gaspillage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            background: white;
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .report-container {
+            text-align: left;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin: 20px auto;
+            overflow: auto;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>📦 Gestion du Stock et du Gaspillage 📦</h2>
+
+    <div class="container">
+        <h3>📝 Saisie des Données</h3>
+
+        <label>Stock Initial (kg) :</label>
+        <input type="number" id="stock_initial" placeholder="Stock initial">
+
+        <h4>📌 Informations sur le Produit</h4>
+        <label>Nom du produit :</label>
+        <input type="text" id="name" placeholder="Nom du produit">
+        
+        <label>Catégorie :</label>
+        <input type="text" id="category" placeholder="Catégorie">
+        
+        <label>Prix (€) :</label>
+        <input type="number" id="price" placeholder="Prix">
+        
+        <label>Ingrédients (séparés par ,) :</label>
+        <input type="text" id="ingredients" placeholder="Ingrédients">
+        
+        <label>Date de production :</label>
+        <input type="date" id="date_production">
+        
+        <label>Quantité produite (kg) :</label>
+        <input type="number" id="production" placeholder="Quantité">
+
+        <h4>⚙️ Valeurs M1 et M2</h4>
+        <label>Date des valeurs machines :</label>
+        <input type="date" id="date_machines">
+        
+        <label>Valeur M1 :</label>
+        <input type="number" id="m1" placeholder="Valeur M1">
+        
+        <label>Valeur M2 :</label>
+        <input type="number" id="m2" placeholder="Valeur M2">
+
+        <button onclick="saveAndGenerateReport()">✅ Enregistrer et Voir Rapport</button>
+    </div>
+
+    <div class="report-container">
+        <h3>📊 Rapport Généré</h3>
+        <pre id="report">Le rapport apparaîtra ici...</pre>
+    </div>
+
+    <script>
+        async function saveAndGenerateReport() {
+            // 1. Enregistrement du stock initial
+            const stock = document.getElementById('stock_initial').value;
+            await fetch('/set_stock', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ stock: stock })
+            });
+
+            // 2. Enregistrement de la production
+            const name = document.getElementById('name').value;
+            const category = document.getElementById('category').value;
+            const price = document.getElementById('price').value;
+            const ingredients = document.getElementById('ingredients').value.split(',');
+            const dateProduction = document.getElementById('date_production').value;
+            const production = document.getElementById('production').value;
+
+            await fetch('/add_production', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    name: name,
+                    category: category,
+                    price: price,
+                    ingredients: ingredients,
+                    date: dateProduction,
+                    production: production
+                })
+            });
+
+            // 3. Enregistrement des valeurs M1 et M2
+            const dateMachines = document.getElementById('date_machines').value;
+            const m1 = document.getElementById('m1').value;
+            const m2 = document.getElementById('m2').value;
+
+            await fetch('/register_machines', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ date: dateMachines, m1: m1, m2: m2 })
+            });
+
+            // 4. Récupération et affichage du rapport
+            fetch('/get_report')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('report').textContent = JSON.stringify(data, null, 2);
+                });
+        }
+    </script>
+
+</body>
+</html>
