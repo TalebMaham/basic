@@ -21,10 +21,8 @@ jobs:
 
     - name: Build and push Docker image
       run: |
-        docker build -t sidiTaleb/basic:latest .
-        docker tag sidiTaleb/basic:latest sidiTaleb/basic:$(date +%Y%m%d%H%M)
-        docker push sidiTaleb/basic:latest
-        docker push sidiTaleb/basic:$(date +%Y%m%d%H%M)
+        docker build -t docker.io/siditaleb/basic:latest .
+        docker push docker.io/siditaleb/basic:latest
 
   deploy:
     runs-on: ubuntu-latest
